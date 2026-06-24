@@ -33,7 +33,7 @@ function calculateGrowth(commits: number) {
 
 export async function GET(
   request: NextRequest,
-  context?: { params?: Promise<{ username: string }> | { username: string } }
+  context: { params: Promise<{ username: string }> }
 ) {
   try {
     // Safely extract username from request URL pathname (e.g. /api/bonsai/username)
