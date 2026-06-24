@@ -35,7 +35,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ username: string }> }
 ) {
-  const { username } = await params;
+  const resolvedParams = await params;
+  const username = resolvedParams?.username;
 
   if (!username) {
     return new NextResponse("Username required", { status: 400 });
