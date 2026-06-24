@@ -31,7 +31,7 @@ export default function Home() {
       const origin = window.location.origin;
       return `${origin}/api/bonsai/${encodeURIComponent(user)}`;
     }
-    return `https://cyber-bonsai.pages.dev/api/bonsai/${user}`;
+    return `https://bonsai.nianshu2022.cn/api/bonsai/${user}`;
   };
 
   const getMarkdownCode = (user: string) => {
