@@ -1,0 +1,8 @@
+name = "cyber-bonsai"
+compatibility_date = "2024-05-05"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cyber-bonsai-db"
+database_id = "7fffea8f-20e8-49f8-835a-52dbcf0cc663"
