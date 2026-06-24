@@ -33,10 +33,17 @@ function calculateGrowth(commits: number) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ username: string }> }
+  context?: { params?: Promise<{ username: string }> | { username: string } }
 ) {
-  const resolvedParams = await params;
-  const username = resolvedParams?.username;
+  // Safely extract username from request URL pathname (e.g. /api/bonsai/username)
+  const url = new URL(request.url);
+  let username = url.pathname.split("/").pop();
+
+  // Fallback to params if pathname parsing doesn't yield a username
+  if (!username && context?.params) {
+    const resolvedParams = await context.params;
+    username = resolvedParams?.username;
+  }
 
   if (!username) {
     return new NextResponse("Username required", { status: 400 });
