@@ -1,7 +1,9 @@
 /**
  * Cloudflare D1 Database Helper
- * Handles reading and writing bonsai state for users.
+ * Handles reading and writing bonsai state for users safely in Edge and Node runtimes.
  */
+import { getRequestContext } from "@cloudflare/next-on-pages";
+import { D1Database } from "@cloudflare/workers-types";
 
 // Define interface matching D1 schema
 export interface BonsaiRecord {
@@ -12,24 +14,42 @@ export interface BonsaiRecord {
   last_updated: string;
 }
 
-// Declare the type for D1 Database in Cloudflare env bindings
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      DB?: import("@cloudflare/workers-types").D1Database;
+      DB?: D1Database;
     }
   }
 }
 
 /**
- * Get D1 database binding safely.
+ * Get D1 database binding safely from Cloudflare Request Context or process.env.
  */
-function getDb() {
-  const db = process.env.DB;
-  if (!db) {
-    // If not found, log warning (occurs during local build outside Pages env)
-    console.warn("Cloudflare D1 Database binding 'DB' is not available in the current environment.");
+function getDb(): D1Database | undefined {
+  let db: D1Database | undefined;
+
+  // 1. Try retrieving from Cloudflare Pages Request Context (Next-on-Pages Edge Runtime)
+  try {
+    const context = getRequestContext();
+    const env = context.env as any;
+    if (context && env && env.DB) {
+      db = env.DB as D1Database;
+    }
+  } catch (error) {
+    // Fails silently during local Next.js builds or environments outside Cloudflare Pages
   }
+
+  // 2. Fallback to process.env (for local development next dev / wrangler pages dev)
+  if (!db) {
+    try {
+      if (typeof process !== "undefined" && process.env && process.env.DB) {
+        db = process.env.DB;
+      }
+    } catch (error) {
+      // Fails silently if process is not defined in strict Edge environments without nodejs_compat
+    }
+  }
+
   return db;
 }
 
@@ -38,7 +58,10 @@ function getDb() {
  */
 export async function getBonsaiRecord(username: string): Promise<BonsaiRecord | null> {
   const db = getDb();
-  if (!db) return null;
+  if (!db) {
+    console.warn("D1 Database is not available. Skipping read.");
+    return null;
+  }
 
   try {
     const record = await db
@@ -62,7 +85,10 @@ export async function upsertBonsaiRecord(
   commitCount: number
 ): Promise<void> {
   const db = getDb();
-  if (!db) return;
+  if (!db) {
+    console.warn("D1 Database is not available. Skipping write.");
+    return;
+  }
 
   try {
     await db
