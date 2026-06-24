@@ -35,94 +35,112 @@ export async function GET(
   request: NextRequest,
   context?: { params?: Promise<{ username: string }> | { username: string } }
 ) {
-  // Safely extract username from request URL pathname (e.g. /api/bonsai/username)
-  const url = new URL(request.url);
-  let username = url.pathname.split("/").pop();
+  try {
+    // Safely extract username from request URL pathname (e.g. /api/bonsai/username)
+    const url = new URL(request.url);
+    let username = url.pathname.split("/").pop();
 
-  // Fallback to params if pathname parsing doesn't yield a username
-  if (!username && context?.params) {
-    const resolvedParams = await context.params;
-    username = resolvedParams?.username;
-  }
+    // Fallback to params if pathname parsing doesn't yield a username
+    if (!username && context?.params) {
+      const resolvedParams = await context.params;
+      username = resolvedParams?.username;
+    }
 
-  if (!username) {
-    return new NextResponse("Username required", { status: 400 });
-  }
+    if (!username) {
+      return new NextResponse("Username required", { status: 400 });
+    }
 
-  const cleanUsername = username.toLowerCase();
-  const now = new Date();
+    const cleanUsername = username.toLowerCase();
+    const now = new Date();
 
-  let record = await getBonsaiRecord(cleanUsername);
-  let commitCount = 0;
-  let shouldUpdate = false;
+    let record = await getBonsaiRecord(cleanUsername);
+    let commitCount = 0;
+    let shouldUpdate = false;
 
-  if (record) {
-    commitCount = record.last_commit_count;
-    // Check if the record was updated more than 30 minutes ago
-    const lastUpdatedDate = new Date(record.last_updated);
-    const diffMs = now.getTime() - lastUpdatedDate.getTime();
-    const diffMinutes = diffMs / (1000 * 60);
+    if (record) {
+      commitCount = record.last_commit_count;
+      // Check if the record was updated more than 30 minutes ago
+      const lastUpdatedDate = new Date(record.last_updated);
+      const diffMs = now.getTime() - lastUpdatedDate.getTime();
+      const diffMinutes = diffMs / (1000 * 60);
 
-    if (diffMinutes > 30) {
+      if (diffMinutes > 30) {
+        shouldUpdate = true;
+      }
+    } else {
+      // First time visitor
       shouldUpdate = true;
     }
-  } else {
-    // First time visitor
-    shouldUpdate = true;
-  }
 
-  if (shouldUpdate) {
-    try {
-      // Pull fresh data from GitHub
-      commitCount = await fetchGithubActivityCount(cleanUsername);
-      const growth = calculateGrowth(commitCount);
-      
-      // Save/update to D1 Database
-      await upsertBonsaiRecord(cleanUsername, growth.level, growth.xp, commitCount);
-      
-      // Update local record representation
-      record = {
-        username: cleanUsername,
-        level: growth.level,
-        xp: growth.xp,
-        last_commit_count: commitCount,
-        last_updated: now.toISOString(),
-      };
-    } catch (err: any) {
-      console.error(`Failed to update activity for ${cleanUsername}:`, err);
-      // Fallback: if we hit API errors or database is down, try to use old record if it exists
-      if (!record) {
-        // Mock a level 0 record if we don't even have a database entry
+    if (shouldUpdate) {
+      try {
+        // Pull fresh data from GitHub
+        commitCount = await fetchGithubActivityCount(cleanUsername);
+        const growth = calculateGrowth(commitCount);
+        
+        // Save/update to D1 Database
+        await upsertBonsaiRecord(cleanUsername, growth.level, growth.xp, commitCount);
+        
+        // Update local record representation
         record = {
           username: cleanUsername,
-          level: 0,
-          xp: 0,
-          last_commit_count: 0,
+          level: growth.level,
+          xp: growth.xp,
+          last_commit_count: commitCount,
           last_updated: now.toISOString(),
         };
+      } catch (err: any) {
+        console.error(`Failed to update activity for ${cleanUsername}:`, err);
+        // Fallback: if we hit API errors or database is down, try to use old record if it exists
+        if (!record) {
+          // Mock a level 0 record if we don't even have a database entry
+          record = {
+            username: cleanUsername,
+            level: 0,
+            xp: 0,
+            last_commit_count: 0,
+            last_updated: now.toISOString(),
+          };
+        }
       }
     }
+
+    // Calculate rendering parameters
+    const growth = calculateGrowth(commitCount);
+    const svg = generateBonsaiSVG({
+      username: cleanUsername,
+      level: record!.level,
+      xp: record!.xp,
+      maxXp: growth.maxXp,
+      commitCount: commitCount,
+      lastUpdated: record!.last_updated,
+      isDry: growth.isDry,
+    });
+
+    // Return SVG with correct Headers and caching policies
+    return new NextResponse(svg, {
+      headers: {
+        "Content-Type": "image/svg+xml",
+        // Cache-Control: Cache for 30 minutes in browser, 1 hour on CDN
+        "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=600",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  } catch (globalError: any) {
+    console.error("Global crash in GET route:", globalError);
+    return new NextResponse(
+      JSON.stringify({
+        error: "Internal Server Error",
+        message: globalError?.message || "Unknown error",
+        stack: globalError?.stack || null,
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
+    );
   }
-
-  // Calculate rendering parameters
-  const growth = calculateGrowth(commitCount);
-  const svg = generateBonsaiSVG({
-    username: cleanUsername,
-    level: record!.level,
-    xp: record!.xp,
-    maxXp: growth.maxXp,
-    commitCount: commitCount,
-    lastUpdated: record!.last_updated,
-    isDry: growth.isDry,
-  });
-
-  // Return SVG with correct Headers and caching policies
-  return new NextResponse(svg, {
-    headers: {
-      "Content-Type": "image/svg+xml",
-      // Cache-Control: Cache for 30 minutes in browser, 1 hour on CDN
-      "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=600",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
 }
