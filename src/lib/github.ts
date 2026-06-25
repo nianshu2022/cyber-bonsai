@@ -26,7 +26,7 @@ export interface GitHubEvent {
 }
 
 /**
- * Fetch public events for a GitHub user and calculate commit/activity count in the last 7 days.
+ * Fetch public events for a GitHub user and calculate commit/activity count in the last 14 days.
  */
 export async function fetchGithubActivityCount(username: string): Promise<number> {
   const url = `https://api.github.com/users/${encodeURIComponent(username)}/events/public?per_page=100`;
@@ -50,15 +50,15 @@ export async function fetchGithubActivityCount(username: string): Promise<number
     }
 
     const events = (await response.json()) as GitHubEvent[];
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
     let activityCount = 0;
 
     for (const event of events) {
       const eventDate = new Date(event.created_at);
-      if (eventDate < sevenDaysAgo) {
-        continue; // Only count last 7 days
+      if (eventDate < fourteenDaysAgo) {
+        continue; // Only count last 14 days
       }
 
       if (event.type === "PushEvent" && event.payload.size) {

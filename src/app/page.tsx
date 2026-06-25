@@ -250,33 +250,33 @@ export default function Home() {
             🌱 盆栽成长法典 (Growth Rules)
           </h2>
           <p className="text-xs text-amber-900 dark:text-amber-300 leading-relaxed mb-6">
-            你的赛博盆栽是一面镜子，忠实折射你最近 7 天在 GitHub 上的工作活跃度。commits/PRs 越多，盆栽就越茂盛、甚至会绽放繁花；一旦搁置开发，它将面临枯萎与休眠。
+            你的赛博盆栽是一面镜子，忠实折射你最近 14 天在 GitHub 上的工作活跃度。commits/PRs 越多，盆栽就越茂盛、甚至会绽放繁花；一旦搁置开发，它将面临枯萎与休眠。
           </p>
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
             <div className="border border-amber-900/20 p-3 bg-white/60 dark:bg-black/20 rounded">
               <strong className="block text-amber-800 dark:text-amber-400 mb-1">LV.0 种子萌芽 (Sprout)</strong>
-              <span>最近 7 天内有 0-1 次 commit</span>
+              <span>最近 14 天内有 1-2 次 commits</span>
             </div>
             <div className="border border-amber-900/20 p-3 bg-white/60 dark:bg-black/20 rounded">
               <strong className="block text-emerald-800 dark:text-emerald-400 mb-1">LV.1 幼苗小树 (Sapling)</strong>
-              <span>最近 7 天内有 2-4 次 commits</span>
+              <span>最近 14 天内有 3-7 次 commits</span>
             </div>
             <div className="border border-amber-900/20 p-3 bg-white/60 dark:bg-black/20 rounded">
               <strong className="block text-blue-800 dark:text-blue-400 mb-1">LV.2 成长阶段 (Growing)</strong>
-              <span>最近 7 天内有 5-9 次 commits</span>
+              <span>最近 14 天内有 8-14 次 commits</span>
             </div>
             <div className="border border-amber-900/20 p-3 bg-white/60 dark:bg-black/20 rounded">
               <strong className="block text-indigo-800 dark:text-indigo-400 mb-1">LV.3 成熟盆景 (Bonsai)</strong>
-              <span>最近 7 天内有 10-19 次 commits</span>
+              <span>最近 14 天内有 15-29 次 commits</span>
             </div>
             <div className="border border-amber-900/20 p-3 bg-white/60 dark:bg-black/20 rounded">
               <strong className="block text-purple-800 dark:text-purple-400 mb-1">LV.4 繁花似锦 (Blooming)</strong>
-              <span>最近 7 天内有 20+ 次 commits 🌸</span>
+              <span>最近 14 天内有 30+ 次 commits 🌸</span>
             </div>
             <div className="border border-amber-900/20 p-3 bg-white/60 dark:bg-black/20 rounded">
               <strong className="block text-amber-700 dark:text-amber-500 mb-1">🍂 缺水休眠 (Dormant)</strong>
-              <span>最近 7 天内 0 commit，盆栽干旱枯黄</span>
+              <span>最近 14 天内 0 commit，盆栽干旱枯黄</span>
             </div>
           </div>
         </section>

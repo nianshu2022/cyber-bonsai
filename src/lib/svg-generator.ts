@@ -10,7 +10,7 @@ interface BonsaiState {
   maxXp: number;
   commitCount: number;
   lastUpdated: string;
-  isDry?: boolean; // True if inactive (no commits in last 7 days)
+  isDry?: boolean; // True if inactive (no commits in last 14 days)
 }
 
 interface Pixel {
@@ -264,7 +264,7 @@ export function generateBonsaiSVG(state: BonsaiState): string {
   <text x="20" y="32" class="text-title">🌱 @${state.username}'s CyberBonsai</text>
   
   <text x="20" y="280" class="text-sub">状态: ${currentLevelName}</text>
-  <text x="20" y="296" class="text-sub">7天 Commits: ${state.commitCount}</text>
+  <text x="20" y="296" class="text-sub">14天 Commits: ${state.commitCount}</text>
   
   <!-- EXP Bar -->
   <text x="20" y="318" class="text-sub">EXP</text>

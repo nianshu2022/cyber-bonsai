@@ -5,27 +5,27 @@ import { generateBonsaiSVG } from "@/lib/svg-generator";
 
 export const runtime = "edge";
 
-// Helper to determine Level and XP based on rolling 7-day activities
+// Helper to determine Level and XP based on rolling 14-day activities
 function calculateGrowth(commits: number) {
   const xp = commits * 10;
   let level = 0;
-  let maxXp = 20;
+  let maxXp = 30;
 
-  if (xp >= 200) {
+  if (xp >= 300) {
     level = 4; // Blooming
-    maxXp = 200;
-  } else if (xp >= 100) {
+    maxXp = 300;
+  } else if (xp >= 150) {
     level = 3; // Bonsai
-    maxXp = 200;
-  } else if (xp >= 50) {
+    maxXp = 300;
+  } else if (xp >= 80) {
     level = 2; // Growing
-    maxXp = 100;
-  } else if (xp >= 20) {
+    maxXp = 150;
+  } else if (xp >= 30) {
     level = 1; // Sapling
-    maxXp = 50;
+    maxXp = 80;
   } else {
     level = 0; // Sprout
-    maxXp = 20;
+    maxXp = 30;
   }
 
   return { level, xp, maxXp, isDry: commits === 0 };
