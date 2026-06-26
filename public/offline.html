@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberBonsai - 离线模式</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 24px;
+      padding: 20px;
+      text-align: center;
+    }
+    .icon { font-size: 64px; }
+    h1 { font-size: 24px; color: #22c55e; }
+    p { color: #a3a3a3; max-width: 300px; line-height: 1.6; }
+    button {
+      background: #22c55e;
+      color: #0a0a0a;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: #16a34a; }
+  </style>
+</head>
+<body>
+  <div class="icon">🌱</div>
+  <h1>暂时无法连接</h1>
+  <p>你的赛博盆栽需要网络才能生长，请检查网络连接后重试</p>
+  <button onclick="window.location.reload()">重新连接</button>
+</body>
+</html>
